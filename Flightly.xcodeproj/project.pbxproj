@@ -1,0 +1,586 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0D4B040BC27C6692C60E9ABA /* FlightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A4950007EB7C8E4151897A /* FlightsView.swift */; };
+		11510D55995ACEF016397D47 /* AirportDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A486AED256608AB3C88295 /* AirportDB.swift */; };
+		202EB13CDDBEE091EF66F71F /* SharedTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC83451A8CC609EF06E2AF0 /* SharedTypes.swift */; };
+		2224F41EA86237C780CC78CE /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08B5D4F4BA590323D86D96E /* AppModel.swift */; };
+		2BD34F3512A030E741C94670 /* LiveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D40091CFBB8A84B10E82967 /* LiveEngine.swift */; };
+		44F41D99A3350650022E97BE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF85D22EDB89F25237484F9C /* SettingsView.swift */; };
+		4772C6899B2EC495497ADC53 /* Importers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A0DC46C845C0287BD0F725 /* Importers.swift */; };
+		5BB36CC5AA2FAD12A73809AC /* FlightIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EE3746BB026279C197E1E1 /* FlightIntents.swift */; };
+		62293252281E392A4C039566 /* SharedTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC83451A8CC609EF06E2AF0 /* SharedTypes.swift */; };
+		6C7BA23C5DDEF08BBA085B02 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31EEC01902E9EC39D3C1C00D /* FriendsView.swift */; };
+		7433C3459CBB43064A1F3C8F /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F46E902C99922021E7A72F /* Components.swift */; };
+		758AEBA02ED6CA9ADF577C3A /* FlightlyWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C5C843BFFA2AEEF52466381 /* FlightlyWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		978A466614E3919E886E8C18 /* AirportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0962760CE2773FF47E92A49E /* AirportsView.swift */; };
+		9E3810FF51E1CC4B527D2C8E /* FlightDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF69DC46A40B0BC6AFB5EC /* FlightDetailView.swift */; };
+		A58F98D143A7CD257E7472EE /* Flight.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF810D2CE602D2D26DDE5FF7 /* Flight.swift */; };
+		AD5D49A4EA71143935D1BDD8 /* AddFlightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1163A6FB77C7157CB21C482 /* AddFlightView.swift */; };
+		BE647936144B030DEB290CA9 /* PassportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AE2FCB0BED834F3D2BEF /* PassportView.swift */; };
+		C80B8C1937CB58035EE24C66 /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE45078B509945636FF7751C /* Widgets.swift */; };
+		D7E494A237326EBEC41747B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20F370BE21C380210B11A7EA /* Assets.xcassets */; };
+		DCEDB425A78F4C5AE06B4359 /* FlightlyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29F249485E46BB3ECB01E0A /* FlightlyApp.swift */; };
+		E74BC3DF438BF912E996A01B /* MapSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6738AF8761F40C32747B8B /* MapSheet.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		25CEAC4F9AE431577D4B596D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6A42D9A3CFEE5C9EF8B8E4E1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8C272AB08B7AB0BEEFF5527E;
+			remoteInfo = FlightlyWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5E4FB99F74E0C65487EC5AFE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				758AEBA02ED6CA9ADF577C3A /* FlightlyWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0962760CE2773FF47E92A49E /* AirportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportsView.swift; sourceTree = "<group>"; };
+		155557F9CE94C231C96F473D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1C5C843BFFA2AEEF52466381 /* FlightlyWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = FlightlyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D40091CFBB8A84B10E82967 /* LiveEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveEngine.swift; sourceTree = "<group>"; };
+		1EC83451A8CC609EF06E2AF0 /* SharedTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedTypes.swift; sourceTree = "<group>"; };
+		20F370BE21C380210B11A7EA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		31EEC01902E9EC39D3C1C00D /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		45A4950007EB7C8E4151897A /* FlightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightsView.swift; sourceTree = "<group>"; };
+		66F46E902C99922021E7A72F /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		74A486AED256608AB3C88295 /* AirportDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportDB.swift; sourceTree = "<group>"; };
+		8E32F5E11A6E7B19152D82ED /* Flightly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Flightly.entitlements; sourceTree = "<group>"; };
+		8F2F75AC19C4654F8915CFDC /* FlightlyWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlightlyWidgets.entitlements; sourceTree = "<group>"; };
+		9625AE2FCB0BED834F3D2BEF /* PassportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassportView.swift; sourceTree = "<group>"; };
+		A08B5D4F4BA590323D86D96E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		A2A0DC46C845C0287BD0F725 /* Importers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Importers.swift; sourceTree = "<group>"; };
+		A3EE3746BB026279C197E1E1 /* FlightIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightIntents.swift; sourceTree = "<group>"; };
+		AF810D2CE602D2D26DDE5FF7 /* Flight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight.swift; sourceTree = "<group>"; };
+		B1163A6FB77C7157CB21C482 /* AddFlightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFlightView.swift; sourceTree = "<group>"; };
+		B6D5D976F8F0A4658A180190 /* Flightly.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Flightly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC6738AF8761F40C32747B8B /* MapSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapSheet.swift; sourceTree = "<group>"; };
+		CE45078B509945636FF7751C /* Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
+		CEAF69DC46A40B0BC6AFB5EC /* FlightDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightDetailView.swift; sourceTree = "<group>"; };
+		E178139DB779110A65B39FC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EF85D22EDB89F25237484F9C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F29F249485E46BB3ECB01E0A /* FlightlyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightlyApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		20E955AD936D8B9F2CAF18BC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B1163A6FB77C7157CB21C482 /* AddFlightView.swift */,
+				0962760CE2773FF47E92A49E /* AirportsView.swift */,
+				66F46E902C99922021E7A72F /* Components.swift */,
+				CEAF69DC46A40B0BC6AFB5EC /* FlightDetailView.swift */,
+				45A4950007EB7C8E4151897A /* FlightsView.swift */,
+				31EEC01902E9EC39D3C1C00D /* FriendsView.swift */,
+				CC6738AF8761F40C32747B8B /* MapSheet.swift */,
+				9625AE2FCB0BED834F3D2BEF /* PassportView.swift */,
+				EF85D22EDB89F25237484F9C /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		36318ACDA06C23A2711A91DA = {
+			isa = PBXGroup;
+			children = (
+				8B743467EFC9BA3AAE6FF6C2 /* Flightly */,
+				8AAF22CD6995EE0AE3D698CF /* FlightlyWidgets */,
+				F6CDF403CFAE3DD84B29CCCA /* Shared */,
+				E284778360A073EB3705A953 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		60C39E8C10FC1B96F378BBB5 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A08B5D4F4BA590323D86D96E /* AppModel.swift */,
+				A2A0DC46C845C0287BD0F725 /* Importers.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		8AAF22CD6995EE0AE3D698CF /* FlightlyWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				8F2F75AC19C4654F8915CFDC /* FlightlyWidgets.entitlements */,
+				E178139DB779110A65B39FC3 /* Info.plist */,
+				CE45078B509945636FF7751C /* Widgets.swift */,
+			);
+			path = FlightlyWidgets;
+			sourceTree = "<group>";
+		};
+		8B743467EFC9BA3AAE6FF6C2 /* Flightly */ = {
+			isa = PBXGroup;
+			children = (
+				20F370BE21C380210B11A7EA /* Assets.xcassets */,
+				8E32F5E11A6E7B19152D82ED /* Flightly.entitlements */,
+				155557F9CE94C231C96F473D /* Info.plist */,
+				E43928202879EE3A4240B61B /* App */,
+				ABDB60E52F8F0DFD56C1C0C5 /* Data */,
+				E4CBBDFBC315DEC1567A2AF2 /* Intents */,
+				AB3405EB45277FC8365185AB /* Models */,
+				60C39E8C10FC1B96F378BBB5 /* Services */,
+				20E955AD936D8B9F2CAF18BC /* Views */,
+			);
+			path = Flightly;
+			sourceTree = "<group>";
+		};
+		AB3405EB45277FC8365185AB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AF810D2CE602D2D26DDE5FF7 /* Flight.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		ABDB60E52F8F0DFD56C1C0C5 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				74A486AED256608AB3C88295 /* AirportDB.swift */,
+				1D40091CFBB8A84B10E82967 /* LiveEngine.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		E284778360A073EB3705A953 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B6D5D976F8F0A4658A180190 /* Flightly.app */,
+				1C5C843BFFA2AEEF52466381 /* FlightlyWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E43928202879EE3A4240B61B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F29F249485E46BB3ECB01E0A /* FlightlyApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E4CBBDFBC315DEC1567A2AF2 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				A3EE3746BB026279C197E1E1 /* FlightIntents.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		F6CDF403CFAE3DD84B29CCCA /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				1EC83451A8CC609EF06E2AF0 /* SharedTypes.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8C272AB08B7AB0BEEFF5527E /* FlightlyWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4164F9D707643F8F1F673FBC /* Build configuration list for PBXNativeTarget "FlightlyWidgets" */;
+			buildPhases = (
+				8663618946CCB090B1F1539D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FlightlyWidgets;
+			packageProductDependencies = (
+			);
+			productName = FlightlyWidgets;
+			productReference = 1C5C843BFFA2AEEF52466381 /* FlightlyWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E1A968CCFB452A83BD036196 /* Flightly */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 048AAC4146E2956E46565BBB /* Build configuration list for PBXNativeTarget "Flightly" */;
+			buildPhases = (
+				4286DC2168903F3A4530013D /* Sources */,
+				C5A7A671E42DCB62CEBD8F57 /* Resources */,
+				5E4FB99F74E0C65487EC5AFE /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0AAB2918233AB574FAB5D0F2 /* PBXTargetDependency */,
+			);
+			name = Flightly;
+			packageProductDependencies = (
+			);
+			productName = Flightly;
+			productReference = B6D5D976F8F0A4658A180190 /* Flightly.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6A42D9A3CFEE5C9EF8B8E4E1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					8C272AB08B7AB0BEEFF5527E = {
+						ProvisioningStyle = Automatic;
+					};
+					E1A968CCFB452A83BD036196 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 6AE7A9AC08D95B947A11296A /* Build configuration list for PBXProject "Flightly" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 36318ACDA06C23A2711A91DA;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E284778360A073EB3705A953 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E1A968CCFB452A83BD036196 /* Flightly */,
+				8C272AB08B7AB0BEEFF5527E /* FlightlyWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C5A7A671E42DCB62CEBD8F57 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7E494A237326EBEC41747B3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4286DC2168903F3A4530013D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD5D49A4EA71143935D1BDD8 /* AddFlightView.swift in Sources */,
+				11510D55995ACEF016397D47 /* AirportDB.swift in Sources */,
+				978A466614E3919E886E8C18 /* AirportsView.swift in Sources */,
+				2224F41EA86237C780CC78CE /* AppModel.swift in Sources */,
+				7433C3459CBB43064A1F3C8F /* Components.swift in Sources */,
+				A58F98D143A7CD257E7472EE /* Flight.swift in Sources */,
+				9E3810FF51E1CC4B527D2C8E /* FlightDetailView.swift in Sources */,
+				5BB36CC5AA2FAD12A73809AC /* FlightIntents.swift in Sources */,
+				DCEDB425A78F4C5AE06B4359 /* FlightlyApp.swift in Sources */,
+				0D4B040BC27C6692C60E9ABA /* FlightsView.swift in Sources */,
+				6C7BA23C5DDEF08BBA085B02 /* FriendsView.swift in Sources */,
+				4772C6899B2EC495497ADC53 /* Importers.swift in Sources */,
+				2BD34F3512A030E741C94670 /* LiveEngine.swift in Sources */,
+				E74BC3DF438BF912E996A01B /* MapSheet.swift in Sources */,
+				BE647936144B030DEB290CA9 /* PassportView.swift in Sources */,
+				44F41D99A3350650022E97BE /* SettingsView.swift in Sources */,
+				62293252281E392A4C039566 /* SharedTypes.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8663618946CCB090B1F1539D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				202EB13CDDBEE091EF66F71F /* SharedTypes.swift in Sources */,
+				C80B8C1937CB58035EE24C66 /* Widgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0AAB2918233AB574FAB5D0F2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8C272AB08B7AB0BEEFF5527E /* FlightlyWidgets */;
+			targetProxy = 25CEAC4F9AE431577D4B596D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		58970FFE7960380B35AE0FF8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FlightlyWidgets/FlightlyWidgets.entitlements;
+				INFOPLIST_FILE = FlightlyWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Flightly;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.flightly.app.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6D6B1D5A1E1C2967C4E89077 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconNight AppIconSunrise";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Flightly/Flightly.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Flightly/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Flightly;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Flightly scans your calendar for flight events so it can add them automatically.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Flightly scans your calendar for flight events so it can add them automatically.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Flightly uses your location to show nearby airports.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSUserActivityTypes = "";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.flightly.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8FB2E03128AE16E5C4F94C23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DE8F7474C87704A9394CB88D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconNight AppIconSunrise";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Flightly/Flightly.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Flightly/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Flightly;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Flightly scans your calendar for flight events so it can add them automatically.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Flightly scans your calendar for flight events so it can add them automatically.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Flightly uses your location to show nearby airports.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSUserActivityTypes = "";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.flightly.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DE9CA70B0B207309DEB40D9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FlightlyWidgets/FlightlyWidgets.entitlements;
+				INFOPLIST_FILE = FlightlyWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Flightly;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.flightly.app.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FCD51FAF3C1A40D23ACF07A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		048AAC4146E2956E46565BBB /* Build configuration list for PBXNativeTarget "Flightly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE8F7474C87704A9394CB88D /* Debug */,
+				6D6B1D5A1E1C2967C4E89077 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4164F9D707643F8F1F673FBC /* Build configuration list for PBXNativeTarget "FlightlyWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE9CA70B0B207309DEB40D9C /* Debug */,
+				58970FFE7960380B35AE0FF8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6AE7A9AC08D95B947A11296A /* Build configuration list for PBXProject "Flightly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8FB2E03128AE16E5C4F94C23 /* Debug */,
+				FCD51FAF3C1A40D23ACF07A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6A42D9A3CFEE5C9EF8B8E4E1 /* Project object */;
+}
