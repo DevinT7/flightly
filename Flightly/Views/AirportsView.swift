@@ -10,7 +10,7 @@ struct AirportsView: View {
     var body: some View {
         NavigationStack {
             let now = model.clock
-            let statuses = AirportDB.search(q).map { SimulatedProvider.shared.status($0, now) }
+            let statuses = AirportDB.search(q).map { model.airportStatus($0) }
             List {
                 if q.isEmpty {
                     Section {
@@ -52,11 +52,14 @@ struct AirportDetailView: View {
     let airport: Airport
     @Environment(AppModel.self) private var model
     @State private var departures = true
+    @State private var realRows: [SimulatedProvider.BoardRow]?
+    @State private var boardNote: String?
+    @State private var loadingBoard = false
 
     var body: some View {
         let now = model.clock
-        let st = SimulatedProvider.shared.status(airport, now)
-        let board = SimulatedProvider.shared.board(airport, departures: departures, now: now)
+        let st = model.airportStatus(airport)
+        let board = realRows ?? SimulatedProvider.shared.board(airport, departures: departures, now: now)
         let hourly = SimulatedProvider.shared.hourlyPerformance(airport, now)
         let isFav = model.favoriteAirports.contains(airport.iata)
         ScrollView {
@@ -70,11 +73,11 @@ struct AirportDetailView: View {
                     Button { var f = model.favoriteAirports; if isFav { f.removeAll { $0 == airport.iata } } else { f.append(airport.iata) }; model.favoriteAirports = f } label: {
                         Label(isFav ? "Remove from favorites" : "Favorite · get disruption alerts", systemImage: isFav ? "star.fill" : "star") }.buttonStyle(.bordered)
                 }
-                SectionCard(title: "Hourly on-time performance", symbol: "chart.xyaxis.line") {
+                SectionCard(title: "Hourly on-time performance (sample data)", symbol: "chart.xyaxis.line") {
                     Chart(hourly, id: \.hour) { LineMark(x: .value("Hour", $0.hour), y: .value("On-time %", $0.onTime)).foregroundStyle(Theme.accent); AreaMark(x: .value("Hour", $0.hour), y: .value("On-time %", $0.onTime)).foregroundStyle(Theme.accent.opacity(0.15)) }
                         .chartYScale(domain: 30...100).frame(height: 150)
                 }
-                SectionCard(title: "Flight board", symbol: "list.bullet.rectangle") {
+                SectionCard(title: realRows != nil ? "Flight board · live" : "Flight board (sample data)", symbol: "list.bullet.rectangle") {
                     Picker("", selection: $departures) { Text("Departures").tag(true); Text("Arrivals").tag(false) }.pickerStyle(.segmented)
                     ForEach(board) { r in
                         HStack {
@@ -85,7 +88,7 @@ struct AirportDetailView: View {
                         }.font(.subheadline)
                     }
                 }
-                SectionCard(title: "Runway Regulars", symbol: "trophy.fill") {
+                SectionCard(title: "Runway Regulars (sample data)", symbol: "trophy.fill") {
                     ForEach(Array(SimulatedProvider.shared.runwayRegulars(airport).enumerated()), id: \.offset) { i, r in
                         HStack { Text(["🥇", "🥈", "🥉"][i]); Text(r.name); Spacer(); Text("\(r.flights) flights").foregroundStyle(.secondary) }.font(.subheadline)
                     }
@@ -94,5 +97,26 @@ struct AirportDetailView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle(airport.iata).navigationBarTitleDisplayMode(.inline)
+        .task(id: departures) { await loadBoard() }
     }
+
+    /// Real board for the next ~2.5 h (costs a few API units, so it is cached per airport/direction for 20 minutes).
+    private func loadBoard() async {
+        realRows = nil
+        guard ADB.hasKey, model.adbAuto || true else { return }
+        let key = "\(airport.iata)-\(departures)"
+        if let hit = BoardCache.shared.get(key) { realRows = hit; return }
+        if let r = model.quota.unitsRemaining, r < ADBQuota.autoFloor { return }
+        loadingBoard = true; defer { loadingBoard = false }
+        if let rows = try? await model.realBoard(iata: airport.iata, departures: departures), !rows.isEmpty {
+            BoardCache.shared.set(key, rows); realRows = rows
+        }
+    }
+}
+
+final class BoardCache {
+    static let shared = BoardCache()
+    private var store: [String: (Date, [SimulatedProvider.BoardRow])] = [:]
+    func get(_ k: String) -> [SimulatedProvider.BoardRow]? { store[k].flatMap { Date().timeIntervalSince($0.0) < 20 * 60 ? $0.1 : nil } }
+    func set(_ k: String, _ v: [SimulatedProvider.BoardRow]) { store[k] = (Date(), v) }
 }

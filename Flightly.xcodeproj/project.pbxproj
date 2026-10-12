@@ -12,6 +12,7 @@
 		202EB13CDDBEE091EF66F71F /* SharedTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC83451A8CC609EF06E2AF0 /* SharedTypes.swift */; };
 		2224F41EA86237C780CC78CE /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08B5D4F4BA590323D86D96E /* AppModel.swift */; };
 		2BD34F3512A030E741C94670 /* LiveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D40091CFBB8A84B10E82967 /* LiveEngine.swift */; };
+		423E3502559E79380F826DDA /* AeroDataBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C82CCA653706326B6E35EB5 /* AeroDataBox.swift */; };
 		44F41D99A3350650022E97BE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF85D22EDB89F25237484F9C /* SettingsView.swift */; };
 		4772C6899B2EC495497ADC53 /* Importers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A0DC46C845C0287BD0F725 /* Importers.swift */; };
 		5BB36CC5AA2FAD12A73809AC /* FlightIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EE3746BB026279C197E1E1 /* FlightIntents.swift */; };
@@ -26,7 +27,9 @@
 		BE647936144B030DEB290CA9 /* PassportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AE2FCB0BED834F3D2BEF /* PassportView.swift */; };
 		C80B8C1937CB58035EE24C66 /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE45078B509945636FF7751C /* Widgets.swift */; };
 		D7E494A237326EBEC41747B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20F370BE21C380210B11A7EA /* Assets.xcassets */; };
+		DB2BFC8065FBB0E1404FD508 /* RealData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 208A6E6FFDBF455281E271AD /* RealData.swift */; };
 		DCEDB425A78F4C5AE06B4359 /* FlightlyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29F249485E46BB3ECB01E0A /* FlightlyApp.swift */; };
+		E6CE27335B826A6A5F667CDD /* RealState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341401C3E7A2E79FDF3D855A /* RealState.swift */; };
 		E74BC3DF438BF912E996A01B /* MapSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6738AF8761F40C32747B8B /* MapSheet.swift */; };
 /* End PBXBuildFile section */
 
@@ -56,12 +59,15 @@
 
 /* Begin PBXFileReference section */
 		0962760CE2773FF47E92A49E /* AirportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportsView.swift; sourceTree = "<group>"; };
+		0C82CCA653706326B6E35EB5 /* AeroDataBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AeroDataBox.swift; sourceTree = "<group>"; };
 		155557F9CE94C231C96F473D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1C5C843BFFA2AEEF52466381 /* FlightlyWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = FlightlyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D40091CFBB8A84B10E82967 /* LiveEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveEngine.swift; sourceTree = "<group>"; };
 		1EC83451A8CC609EF06E2AF0 /* SharedTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedTypes.swift; sourceTree = "<group>"; };
+		208A6E6FFDBF455281E271AD /* RealData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealData.swift; sourceTree = "<group>"; };
 		20F370BE21C380210B11A7EA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		31EEC01902E9EC39D3C1C00D /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		341401C3E7A2E79FDF3D855A /* RealState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealState.swift; sourceTree = "<group>"; };
 		45A4950007EB7C8E4151897A /* FlightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightsView.swift; sourceTree = "<group>"; };
 		66F46E902C99922021E7A72F /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		74A486AED256608AB3C88295 /* AirportDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportDB.swift; sourceTree = "<group>"; };
@@ -112,8 +118,10 @@
 		60C39E8C10FC1B96F378BBB5 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				0C82CCA653706326B6E35EB5 /* AeroDataBox.swift */,
 				A08B5D4F4BA590323D86D96E /* AppModel.swift */,
 				A2A0DC46C845C0287BD0F725 /* Importers.swift */,
+				208A6E6FFDBF455281E271AD /* RealData.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -157,6 +165,7 @@
 			children = (
 				74A486AED256608AB3C88295 /* AirportDB.swift */,
 				1D40091CFBB8A84B10E82967 /* LiveEngine.swift */,
+				341401C3E7A2E79FDF3D855A /* RealState.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -288,6 +297,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AD5D49A4EA71143935D1BDD8 /* AddFlightView.swift in Sources */,
+				423E3502559E79380F826DDA /* AeroDataBox.swift in Sources */,
 				11510D55995ACEF016397D47 /* AirportDB.swift in Sources */,
 				978A466614E3919E886E8C18 /* AirportsView.swift in Sources */,
 				2224F41EA86237C780CC78CE /* AppModel.swift in Sources */,
@@ -302,6 +312,8 @@
 				2BD34F3512A030E741C94670 /* LiveEngine.swift in Sources */,
 				E74BC3DF438BF912E996A01B /* MapSheet.swift in Sources */,
 				BE647936144B030DEB290CA9 /* PassportView.swift in Sources */,
+				DB2BFC8065FBB0E1404FD508 /* RealData.swift in Sources */,
+				E6CE27335B826A6A5F667CDD /* RealState.swift in Sources */,
 				44F41D99A3350650022E97BE /* SettingsView.swift in Sources */,
 				62293252281E392A4C039566 /* SharedTypes.swift in Sources */,
 			);

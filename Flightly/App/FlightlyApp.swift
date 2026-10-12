@@ -41,7 +41,14 @@ struct RootView: View {
                 NavigationStack { AddFlightView(embedded: true) { tab = 0 } }
             }
         }
-        .task(id: model.now) { model.refresh(flights, context: context) }
+        .task(id: model.now) { model.refresh(flights, context: context); await model.refreshRealData(); await model.refreshRealFlights(flights, context: context) }
+        #if DEBUG
+        .task {
+            let env = ProcessInfo.processInfo.environment
+            if let k = env["FLIGHTLY_TEST_KEY"] { model.saveKey(k) }
+            if let f = env["FLIGHTLY_FIXTURE"], let i = env["FLIGHTLY_FIXTURE_AIRPORT"] { model.loadFixture(path: f, hereAirportInfo: i, context: context) }
+        }
+        #endif
         .onChange(of: model.requestedTab) { _, t in if let t { tab = t; model.requestedTab = nil } }
         .task(id: flights.count) { for f in flights where f.ownerName == nil { model.scheduleReminders(for: f) } }
     }

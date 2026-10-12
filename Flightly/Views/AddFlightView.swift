@@ -10,6 +10,8 @@ struct AddFlightView: View {
     @State private var mode = 0
     // flight number
     @State private var airline = "DL"
+    @State private var searching = false
+    @State private var searchError: String?
     @State private var number = ""
     @State private var date = Date()
     // route
@@ -32,18 +34,22 @@ struct AddFlightView: View {
                 Picker("", selection: $mode) { Text("Flight no.").tag(0); Text("Route").tag(1); Text("Past flight").tag(2) }.pickerStyle(.segmented).listRowBackground(Color.clear)
                 switch mode {
                 case 0:
-                    Section("Search by flight number") {
-                        Picker("Airline", selection: $airline) { ForEach(AirportDB.airlines) { Text("\($0.code) · \($0.name)").tag($0.code) } }
-                        TextField("Flight number", text: $number).keyboardType(.numberPad)
+                    Section {
+                        TextField("Flight number, e.g. DL 1486", text: $number).textInputAutocapitalization(.characters).autocorrectionDisabled()
                         DatePicker("Date", selection: $date, displayedComponents: .date)
-                        Button("Search") { search { [model.provider.lookup(airlineCode: airline, number: number, date: date)].compactMap { $0 } } }.disabled(number.isEmpty)
+                        Button { Task { await searchNumber() } } label: { HStack { Text(searching ? "Searching…" : "Search"); if searching { ProgressView() } } }.disabled(number.trimmingCharacters(in: .whitespaces).count < 3 || searching)
+                    } header: { Text("Search by flight number") } footer: {
+                        if model.hasKey { Text("Looks up the real flight (uses about 2 of your monthly API units).") }
+                        else { Text("No live data key set, so this searches built-in sample schedules. Add a key in Settings → Data sources for real flights.") }
                     }
+                    if let searchError { Section { Text(searchError).font(.footnote).foregroundStyle(Theme.warn)
+                        if model.hasKey { Button("Use a sample schedule instead") { let (c, n) = parseFlightText(number); search { [model.provider.lookup(airlineCode: c, number: n, date: date)].compactMap { $0 } }; self.searchError = nil } } } }
                 case 1:
-                    Section("Search by route") {
+                    Section {
                         AirportPicker(selection: $from, title: "From"); AirportPicker(selection: $to, title: "To")
                         DatePicker("Date", selection: $date, displayedComponents: .date)
                         Button("Search") { search { model.provider.routeSearch(from: from, to: to, date: date) } }.disabled(from.isEmpty || to.isEmpty)
-                    }
+                    } header: { Text("Search by route") } footer: { Text("Route search uses sample schedules. For a real flight, search by flight number.") }
                 default:
                     Section("Add a flight you've already taken") {
                         Picker("Airline", selection: $mAirline) { Text("Select").tag(""); ForEach(AirportDB.airlines) { Text("\($0.code) · \($0.name)").tag($0.code) } }
@@ -57,7 +63,9 @@ struct AddFlightView: View {
                     Section(results.isEmpty ? "No flights found" : "Results") {
                         ForEach(results) { f in
                             Button { add(f) } label: {
-                                HStack { VStack(alignment: .leading) { Text("\(f.airlineName) \(f.code)").foregroundStyle(.primary).fontWeight(.semibold)
+                                HStack { VStack(alignment: .leading) { HStack(spacing: 6) { Text("\(f.airlineName) \(f.code)").foregroundStyle(.primary).fontWeight(.semibold)
+                                        Text(f.isReal ? "LIVE" : "SAMPLE").font(.system(size: 9, weight: .heavy)).foregroundStyle(f.isReal ? Theme.good : .secondary)
+                                            .padding(.horizontal, 5).padding(.vertical, 2).background((f.isReal ? Theme.good : Color.secondary).opacity(0.14), in: Capsule()) }
                                     Text("\(f.dep) \(f.depTime()) → \(f.arr) \(f.arrTime())").font(.caption).foregroundStyle(.secondary) }
                                     Spacer(); Image(systemName: "plus.circle.fill") }
                             }
@@ -76,7 +84,26 @@ struct AddFlightView: View {
     }
 
     private func search(_ f: () -> [Flight]) { results = f(); searched = true }
+    private func parseFlightText(_ t: String) -> (String, String) {
+        let c = t.uppercased().filter { !$0.isWhitespace }
+        return (String(c.prefix(2)), String(c.dropFirst(2)))
+    }
+    private func searchNumber() async {
+        let (code, num) = parseFlightText(number)
+        searchError = nil; searching = true; defer { searching = false }
+        if model.hasKey {
+            do {
+                let found = try await model.lookupRealFlights(code: code, number: num, date: date)
+                results = found; searched = true
+                if found.isEmpty { searchError = "No flight \(code) \(num) found for that date. Check the number and date." }
+            } catch { searchError = error.localizedDescription }
+        } else {
+            search { [model.provider.lookup(airlineCode: code, number: num, date: date)].compactMap { $0 } }
+            if results.isEmpty { searchError = "That airline code isn't in the sample data." }
+        }
+    }
     private func add(_ f: Flight) {
+        if f.isReal { model.adopt(f) }
         context.insert(f); try? context.save(); model.scheduleReminders(for: f); if let onDone { onDone() } else { dismiss() }
     }
     private func addManual() {

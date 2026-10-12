@@ -44,6 +44,14 @@ struct LiveState {
     var trend: [Double]          // predicted delay by hour (min), for Delay Trend
     var canceledRisk: Double
     var minutesToBoarding: Int
+    var weatherLive = false          // true when depWeather/arrWeather come from real METARs
+    var faaDep: FAAStatus? = nil     // real FAA programs at the airports (US only)
+    var faaArr: FAAStatus? = nil
+    // Provenance. For real flights the simulator-only sections (inbound chain, forecast, trend) are left empty.
+    var isReal = false
+    var wheelsUp: Date? = nil
+    var wheelsDown: Date? = nil
+    var updatedAt: Date? = nil
 }
 
 /// Protocol so a real data source (AeroAPI, AeroDataBox, ...) can replace the simulator.
@@ -207,12 +215,12 @@ struct SimulatedProvider: FlightDataProvider {
         case .canceled: prediction = "This flight has been canceled."
         case .arrived, .landed: prediction = arrDelay > 15 ? "Arrived \(arrDelay) min late." : (arrDelay < -5 ? "Arrived \(-arrDelay) min early." : "Arrived on time.")
         default:
-            if finalDelay >= 15 && hrsToDep > 0 && shown < 15 { prediction = "Delay predicted: about \(finalDelay) min. Tap Why for details." }
+            if finalDelay >= 15 && hrsToDep > 0 && shown < 15 { prediction = "Delay predicted: about \(finalDelay) min." }
             else if depDelay >= 15 { prediction = "Departure is running \(depDelay) min late." }
             else { prediction = "Currently expected on time." }
         }
 
-        return LiveState(
+        var st = LiveState(
             phase: phase, depDelay: depDelay, arrDelay: canceled ? 0 : arrDelay,
             estDep: estDep, estArr: estArr,
             actDep: now >= wheelsUp ? wheelsUp : nil, actArr: now >= wheelsDown ? wheelsDown : nil,
@@ -222,6 +230,8 @@ struct SimulatedProvider: FlightDataProvider {
             routeOnTimePct: forecast[0].pct + forecast[1].pct, routeAvgDelay: avgDelay,
             depWeather: weather(f.dep, now), arrWeather: weather(f.arr, now), trend: trend,
             canceledRisk: canc * scale, minutesToBoarding: Int(estDep.addingTimeInterval(-40 * 60).timeIntervalSince(now) / 60))
+        st.wheelsUp = wheelsUp; st.wheelsDown = wheelsDown
+        return st
     }
 
     // MARK: weather & airports

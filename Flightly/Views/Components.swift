@@ -367,10 +367,12 @@ actor AircraftPhotoCache {
 
 struct AircraftPhoto: View {
     let type: String?
+    var tail: String? = nil
     var height: CGFloat = 170
     var cornerRadius: CGFloat = 16
     @State private var url: URL?
-    @State private var failed = false
+    @State private var credit = ""
+    @State private var page: URL?
 
     var body: some View {
         Group {
@@ -388,15 +390,22 @@ struct AircraftPhoto: View {
         .clipped()
         .overlay(alignment: .bottomTrailing) {
             if url != nil {
-                Text("Photo: Wikimedia Commons").font(.system(size: 9, weight: .medium)).foregroundStyle(.white)
-                    .padding(.horizontal, 6).padding(.vertical, 2).background(.black.opacity(0.4), in: Capsule()).padding(6)
+                Group {
+                    if let page { Link(credit, destination: page) } else { Text(credit) }
+                }
+                .font(.system(size: 9, weight: .medium)).foregroundStyle(.white)
+                .padding(.horizontal, 6).padding(.vertical, 2).background(.black.opacity(0.45), in: Capsule()).padding(6)
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .task(id: type) {
+        .task(id: "\(type ?? "")|\(tail ?? "")") {
+            // Prefer a real photo of this exact aircraft (by registration); fall back to a photo of the type.
+            if let tail, let p = await TailPhotoCache.shared.photo(forRegistration: tail) {
+                url = p.url; credit = "Photo: \(p.photographer) · Planespotters.net"; page = p.page; return
+            }
             guard let type else { return }
             url = await AircraftPhotoCache.shared.url(for: type)
-            failed = url == nil
+            credit = "Type photo: Wikimedia Commons"; page = nil
         }
     }
     private var placeholder: some View {

@@ -2,3 +2,7 @@
 DerivedData/
 *.xcodeproj/xcuserdata/
 .DS_Store
+
+.probe/
+.env
+Secrets.xcconfig

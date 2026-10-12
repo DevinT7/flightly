@@ -1,16 +1,17 @@
 import Foundation
 import CoreLocation
 
-struct Airport: Identifiable, Hashable {
+struct Airport: Identifiable, Hashable, Codable {
     var id: String { iata }
     let iata: String, name: String, city: String, country: String
     let lat: Double, lon: Double
     let tz: String
+    var icaoCode: String? = nil
     var coordinate: CLLocationCoordinate2D { .init(latitude: lat, longitude: lon) }
     var timeZone: TimeZone { TimeZone(identifier: tz) ?? .current }
 }
 
-struct Airline: Identifiable, Hashable {
+struct Airline: Identifiable, Hashable, Codable {
     var id: String { code }
     let code: String, name: String
 }
@@ -99,12 +100,35 @@ enum AirportDB {
 
     private static let byIata: [String: Airport] = Dictionary(uniqueKeysWithValues: all.map { ($0.iata, $0) })
     private static let byCode: [String: Airline] = Dictionary(uniqueKeysWithValues: airlines.map { ($0.code, $0) })
-    static func airport(_ iata: String) -> Airport? { byIata[iata.uppercased()] }
-    static func airline(_ code: String) -> Airline? { byCode[code.uppercased()] }
+
+    // Airports/airlines learned from live flight data (persisted), so real flights outside the built-in list still work.
+    private static let extraKey = "extraAirports", extraAirlineKey = "extraAirlines"
+    nonisolated(unsafe) private static var extraAirports: [String: Airport] = {
+        guard let d = UserDefaults.standard.data(forKey: extraKey), let v = try? JSONDecoder().decode([String: Airport].self, from: d) else { return [:] }
+        return v
+    }()
+    nonisolated(unsafe) private static var extraAirlines: [String: Airline] = {
+        guard let d = UserDefaults.standard.data(forKey: extraAirlineKey), let v = try? JSONDecoder().decode([String: Airline].self, from: d) else { return [:] }
+        return v
+    }()
+    static var learnedAirports: [Airport] { Array(extraAirports.values) }
+    static func register(_ a: Airport) {
+        guard byIata[a.iata] == nil else { return }
+        extraAirports[a.iata] = a
+        if let d = try? JSONEncoder().encode(extraAirports) { UserDefaults.standard.set(d, forKey: extraKey) }
+    }
+    static func register(_ a: Airline) {
+        guard byCode[a.code] == nil else { return }
+        extraAirlines[a.code] = a
+        if let d = try? JSONEncoder().encode(extraAirlines) { UserDefaults.standard.set(d, forKey: extraAirlineKey) }
+    }
+    static func airport(_ iata: String) -> Airport? { byIata[iata.uppercased()] ?? extraAirports[iata.uppercased()] }
+    static func airline(_ code: String) -> Airline? { byCode[code.uppercased()] ?? extraAirlines[code.uppercased()] }
     static func search(_ q: String) -> [Airport] {
         let s = q.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !s.isEmpty else { return all }
-        return all.filter { $0.iata.lowercased().hasPrefix(s) || $0.city.lowercased().contains(s) || $0.name.lowercased().contains(s) || $0.country.lowercased().contains(s) }
+        let pool = all + extraAirports.values.sorted { $0.iata < $1.iata }
+        guard !s.isEmpty else { return pool }
+        return pool.filter { $0.iata.lowercased().hasPrefix(s) || $0.city.lowercased().contains(s) || $0.name.lowercased().contains(s) || $0.country.lowercased().contains(s) }
     }
 }
 

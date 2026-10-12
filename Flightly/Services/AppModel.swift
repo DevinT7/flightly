@@ -18,6 +18,23 @@ final class AppModel {
     /// Last state pushed to each activity, used to decide when an update deserves an alert.
     private var lastPushed: [String: FlightActivityAttributes.ContentState] = [:]
     var simulatedClockOffset: TimeInterval = 0   // lets you "fast-forward" to watch a flight play out
+
+    // MARK: Live flight data (AeroDataBox)
+    var quota = ADBQuota()
+    var snapshots: [String: RealSnapshot] = [:]      // keyed by Flight.uuid; persisted to save quota across launches
+    var adbError: String?
+    var adbBusy = false
+    var hasKey = ADB.hasKey                     // observable mirror of the stored key, so Settings updates immediately
+    var keyMessage: String?
+    func saveKey(_ k: String) {
+        let key = k.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty else { return }
+        if let where_ = Keychain.set(key, account: "rapidapi-key") { keyMessage = "Key saved (\(where_))."; adbError = nil } else { keyMessage = "Couldn't store the key on this device." }
+        hasKey = ADB.hasKey
+    }
+    func removeKey() { Keychain.delete("rapidapi-key"); hasKey = ADB.hasKey; keyMessage = "Key removed." }
+    var pendingSnapshots: [String: RealSnapshot] = [:]   // looked-up but not yet added
+    @ObservationIgnored @AppStorage("adb_auto") var adbAuto = true
     /// Set by a flightly://flight?id=… link (Live Activity / widget tap); the Flights tab consumes it.
     var pendingFlightID: UUID?
     var requestedTab: Int?
@@ -40,6 +57,7 @@ final class AppModel {
         // Test aid: `-simOffsetHours 14` on launch fast-forwards the simulated clock.
         let launchOffset = UserDefaults.standard.double(forKey: "simOffsetHours")
         if launchOffset != 0 { simulatedClockOffset = launchOffset * 3600 }
+        loadPersistedADB()
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.now = Date() }
@@ -48,7 +66,64 @@ final class AppModel {
         for a in Activity<FlightActivityAttributes>.activities { activities[a.attributes.flightID] = a }
     }
 
-    func live(_ f: Flight) -> LiveState { provider.state(for: f, at: clock) }
+    // MARK: Real data (free public sources); simulator is the fallback
+
+    var liveWeather: [String: WeatherInfo] = [:]        // keyed by IATA
+    var faaStatuses: [String: FAAStatus] = [:]
+    var weatherUpdated: Date?
+    var faaUpdated: Date?
+    var faaError: String?
+    private var realRefreshing = false
+
+    /// Runs in its own unstructured task so a SwiftUI `.task` restart (the clock ticks every 15 s) can't cancel in-flight requests.
+    func refreshRealData(force: Bool = false) async {
+        await Task { await self.performRealRefresh(force: force) }.value
+    }
+
+    private func performRealRefresh(force: Bool) async {
+        if realRefreshing { return }
+        if !force, let w = weatherUpdated, Date().timeIntervalSince(w) < 10 * 60 { return }
+        realRefreshing = true; defer { realRefreshing = false }
+        let pool = AirportDB.all + AirportDB.learnedAirports
+        async let metars = MetarService.fetch(icaos: pool.map(\.icao))
+        async let faa = FAAService.fetch()
+        let (m, f) = await (metars, faa)
+        if !m.isEmpty {
+            var byIata: [String: WeatherInfo] = [:]
+            for a in pool { if let w = m[a.icao] { byIata[a.iata] = w } }
+            liveWeather = byIata; weatherUpdated = Date()
+        }
+        if let st = f.statuses { faaStatuses = st; faaUpdated = Date(); faaError = nil } else { faaError = f.error }
+    }
+
+    func weather(_ iata: String, fallback: WeatherInfo) -> (info: WeatherInfo, live: Bool) {
+        if let w = liveWeather[iata] { return (w, true) }
+        return (fallback, false)
+    }
+
+    func live(_ f: Flight) -> LiveState {
+        var s: LiveState
+        if f.isReal, let snap = snapshots[f.uuid.uuidString] { s = RealState.make(f, snap, now: Date()) }
+        else if f.isReal { s = RealState.make(f, RealSnapshot(emptyFor: f), now: Date()) }
+        else { s = provider.state(for: f, at: clock) }
+        if let w = liveWeather[f.dep] { s.depWeather = w }
+        if let w = liveWeather[f.arr] { s.arrWeather = w }
+        s.weatherLive = liveWeather[f.dep] != nil && liveWeather[f.arr] != nil
+        s.faaDep = faaStatuses[f.dep]; s.faaArr = faaStatuses[f.arr]
+        return s
+    }
+
+    /// Airport status: real FAA + METAR where available (US FAA coverage only), otherwise simulated.
+    func airportStatus(_ a: Airport) -> SimulatedProvider.AirportStatus {
+        let sim = SimulatedProvider.shared.status(a, clock)
+        guard let w = liveWeather[a.iata] else { return sim }
+        if let faa = faaStatuses[a.iata] {
+            return .init(airport: a, severity: faa.severity, avgDelay: faa.averageMinutes ?? 0, reason: "\(faa.kind.rawValue): \(faa.reason)", weather: w)
+        }
+        var sev = 0; var reason = a.country == "United States" ? "No FAA delays reported" : "No delay data (FAA covers US airports)"
+        if ["Thunderstorms", "Snow", "Fog"].contains(w.condition) { sev = 1; reason = "\(w.condition) in the area" }
+        return .init(airport: a, severity: sev, avgDelay: 0, reason: reason, weather: w)
+    }
 
     // MARK: Deep links
 

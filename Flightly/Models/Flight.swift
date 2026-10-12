@@ -41,6 +41,7 @@ final class Flight {
     var changesData: Data? = nil
     var lastDelay: Int = 0
     var lastPhase: String = ""
+    var isReal: Bool = false              // schedule/gates/status come from a live data provider
     var liveOptOut: Bool = false          // user turned the Live Activity off for this flight
     var createdAt: Date = Date()
 

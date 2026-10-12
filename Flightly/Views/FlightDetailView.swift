@@ -19,7 +19,7 @@ struct FlightDetailView: View {
     var body: some View {
         let s = model.live(flight)
         MapSheet(detent: $detent, map: { FlightMap(flight: flight, state: s) }, controls: { EmptyView() },
-                 header: { header(s) }, content: { content(s) })
+                 header: { header(s) }, content: { content(s) }, backdrop: Color(red: 0.07, green: 0.14, blue: 0.24))
             .toolbar(.hidden, for: .navigationBar)
             .toolbar(.hidden, for: .tabBar)
             .sheet(isPresented: $showEdit) { EditFlightView(flight: flight) }
@@ -49,8 +49,24 @@ struct FlightDetailView: View {
             }
             Text(flight.cityTitle).font(.f(30, .bold)).lineLimit(1).minimumScaleFactor(0.7)
             statusLine(s)
+            sourceLine(s)
         }
         .padding(.horizontal, 20).padding(.bottom, 10)
+    }
+
+    /// Where this flight's data comes from, and a manual refresh for real flights (costs API units).
+    @ViewBuilder private func sourceLine(_ s: LiveState) -> some View {
+        HStack(spacing: 6) {
+            Circle().fill(s.isReal ? Theme.good : Theme.warn).frame(width: 6, height: 6)
+            if s.isReal {
+                Text(s.updatedAt.map { $0 == .distantPast ? "Live data · not yet loaded" : "Live data · updated \($0.formatted(date: .omitted, time: .shortened))" } ?? "Live data").font(.f(12)).foregroundStyle(.secondary)
+                Spacer()
+                Button { Task { await model.refreshRealFlights(all, context: context, force: flight) } } label: {
+                    HStack(spacing: 4) { if model.adbBusy { ProgressView().controlSize(.mini) } else { Image(systemName: "arrow.clockwise") }; Text("Refresh") }.font(.f(12, .semibold))
+                }.disabled(model.adbBusy)
+            } else { Text("Simulated flight data").font(.f(12)).foregroundStyle(.secondary) }
+        }
+        if s.isReal, let e = model.adbError { Text(e).font(.f(12)).foregroundStyle(Theme.warn) }
     }
 
     @ViewBuilder private func statusLine(_ s: LiveState) -> some View {
@@ -68,12 +84,12 @@ struct FlightDetailView: View {
         VStack(alignment: .leading, spacing: 30) {
             endpoints(s)
             if s.phase == .enRoute { progressStrip(s) }
-            wheresMyPlane(s)
+            if !s.inbound.isEmpty { wheresMyPlane(s) }
             notices(s)
             connectionCard(s)
             timeline(s)
-            forecastCard(s)
-            trendCard(s)
+            if !s.forecast.isEmpty { forecastCard(s) }
+            if !s.trend.isEmpty { trendCard(s) }
             weatherCard(s)
             assistantsCard(s)
             aircraftCard(s)
@@ -103,9 +119,9 @@ struct FlightDetailView: View {
             Text(time).font(.f(22, .bold)).monospacedDigit().foregroundStyle(late ? Theme.warn : Theme.good)
             if time != sched { Text(sched).font(.f(13)).monospacedDigit().strikethrough().foregroundStyle(.secondary) }
             HStack(spacing: 6) {
-                chip(terminal.allSatisfy(\.isNumber) ? "T\(terminal)" : "Term \(terminal)")
-                gateChip(gate)
-                if let bag { chip("Bag \(bag)") }
+                if terminal != "—", !terminal.isEmpty { chip(terminal.allSatisfy(\.isNumber) ? "T\(terminal)" : "Term \(terminal)") }
+                if gate != "—", !gate.isEmpty { gateChip(gate) }
+                if let bag, bag != "—" { chip("Bag \(bag)") }
             }.padding(.top, 4)
         }
     }
@@ -153,7 +169,7 @@ struct FlightDetailView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Where's My Plane?").font(.f(18, .bold)).foregroundStyle(.white)
                 Text("\(flight.aircraft) · \(flight.tail)").font(.f(14, .medium)).foregroundStyle(.white.opacity(0.9))
-                AircraftPhoto(type: flight.aircraft, height: 130, cornerRadius: 12).padding(.top, 8)
+                AircraftPhoto(type: flight.aircraft, tail: flight.tail, height: 130, cornerRadius: 12).padding(.top, 8)
             }
             .padding(16).frame(maxWidth: .infinity, alignment: .leading)
             .background(LinearGradient(colors: [Color(red: 0.25, green: 0.52, blue: 0.86), Color(red: 0.55, green: 0.74, blue: 0.94)], startPoint: .top, endPoint: .bottom))
@@ -175,29 +191,33 @@ struct FlightDetailView: View {
                         Text(leg.delay >= 15 ? "\(leg.delay)m Late" : (leg.delay <= -5 ? "\(-leg.delay)m Early" : "On Time")).font(.f(13, .semibold)).foregroundStyle(Theme.delayColor(leg.delay))
                     }
                 }
-                Text("Photo: Wikimedia Commons").font(.f(10)).foregroundStyle(.tertiary)
             }.padding(16)
         }
         .background(Theme.sheetGroup)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
-    /// ATC advisory card for airport programs (red, like Flighty's notices).
+    /// Real FAA programs (ground stops, ground delay programs, delays, closures) at either airport. Only shown when the
+    /// FAA is actually reporting one, so nothing here is invented. US airports only.
     @ViewBuilder private func notices(_ s: LiveState) -> some View {
-        let reason = s.delayReason ?? ""
-        if reason.hasPrefix("Weather") || reason.hasPrefix("Ground stop") || reason.hasPrefix("Air traffic") {
-            let code = reason.hasSuffix(flight.dep) ? flight.dep : flight.arr
+        let items: [(String, FAAStatus)] = [(flight.dep, s.faaDep), (flight.arr, s.faaArr)].compactMap { code, st in st.map { (code, $0) } }
+        if !items.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                HStack { Text("\(code) \(code == flight.dep ? "Departures" : "Arrivals")").font(.f(15, .semibold)); Spacer()
-                    Text("\(max(s.depDelay, 15))m delay").font(.f(13, .semibold)).foregroundStyle(Theme.bad) }.padding(16)
+                ForEach(Array(items.enumerated()), id: \.offset) { i, item in
+                    let (code, st) = item
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: st.severity >= 3 ? "exclamationmark.octagon.fill" : "exclamationmark.circle.fill").foregroundStyle(st.severity >= 3 ? Theme.bad : Theme.warn).font(.system(size: 22))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\(code): \(st.kind.rawValue)").font(.f(15, .bold)).foregroundStyle(st.severity >= 3 ? Theme.bad : Theme.warn)
+                            Text(st.reason.prefix(1).uppercased() + st.reason.dropFirst()).font(.f(14, .medium))
+                            if !st.detail.isEmpty { Text(st.detail).font(.f(13)).foregroundStyle(.secondary) }
+                        }
+                        Spacer(minLength: 0)
+                    }.padding(16)
+                    if i < items.count - 1 { Rectangle().fill(Theme.hairline).frame(height: 0.5) }
+                }
                 Rectangle().fill(Theme.hairline).frame(height: 0.5)
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Theme.bad).font(.system(size: 22))
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(reason.hasPrefix("Ground stop") ? "Flights to \(code) grounded" : reason).font(.f(15, .bold)).foregroundStyle(Theme.bad)
-                        Text("Advisory from Air Traffic Control. Expect holds until conditions improve.").font(.f(13)).foregroundStyle(.secondary)
-                    }
-                }.padding(16)
+                Text("Live · FAA National Airspace System status").font(.f(11)).foregroundStyle(.tertiary).padding(.horizontal, 16).padding(.vertical, 10)
             }
             .background(Theme.sheetGroup, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
@@ -229,12 +249,11 @@ struct FlightDetailView: View {
 
     // MARK: Timeline (vertical dots + rail)
     private func timeline(_ s: LiveState) -> some View {
-        let wheelsUp = s.estDep.addingTimeInterval(Double(s.taxiOutMin) * 60)
-        let wheelsDown = s.estArr.addingTimeInterval(-Double(s.taxiInMin) * 60)
+        func t(_ d: Date?, _ ap: Airport?) -> String { d.map { flight.fmt($0, airport: ap) } ?? "—" }
         let steps: [(String, String, Bool)] = [
             ("Departs gate", flight.depTime(s.estDep), s.phase != .scheduled && s.phase != .boarding),
-            ("Takes off", flight.depTime(wheelsUp), s.actDep != nil),
-            ("Lands", flight.arrTime(wheelsDown), s.actArr != nil),
+            ("Takes off", t(s.wheelsUp, flight.depAirport), s.actDep != nil),
+            ("Lands", t(s.wheelsDown, flight.arrAirport), s.actArr != nil),
             ("Arrives at gate", flight.arrTime(s.estArr), s.phase == .arrived || s.phase == .landed),
         ]
         return section("Timeline") {
@@ -248,12 +267,12 @@ struct FlightDetailView: View {
                     HStack { Text(st.0).font(.f(16)); Spacer(); Text(st.1).font(.f(16, .semibold)).monospacedDigit() }.padding(.bottom, i < steps.count - 1 ? 18 : 0)
                 }
             }
-            Text("Taxi out \(s.taxiOutMin) min · taxi in \(s.taxiInMin) min").font(.f(13)).foregroundStyle(.secondary).padding(.top, 12)
+            if s.taxiOutMin > 0 || s.taxiInMin > 0 { Text("Taxi out \(s.taxiOutMin) min · taxi in \(s.taxiInMin) min").font(.f(13)).foregroundStyle(.secondary).padding(.top, 12) }
         }
     }
 
     private func forecastCard(_ s: LiveState) -> some View {
-        section("Arrival forecast") {
+        section("Arrival forecast (sample data)") {
             Text("\(Int(s.routeOnTimePct))% of \(flight.dep)→\(flight.arr) flights on \(flight.airlineName) arrived on time in the last 60 days. Average delay \(s.routeAvgDelay) min.")
                 .font(.f(14)).foregroundStyle(.secondary).padding(.bottom, 8)
             Chart(s.forecast) { b in
@@ -269,7 +288,7 @@ struct FlightDetailView: View {
 
     private func trendCard(_ s: LiveState) -> some View {
         let depHour = Calendar.current.dateComponents(in: flight.depAirport?.timeZone ?? .current, from: flight.schedDep).hour ?? 0
-        return section("Delay trend at \(flight.dep)") {
+        return section("Delay trend at \(flight.dep) (sample data)") {
             Chart(Array(s.trend.enumerated()), id: \.offset) { h, v in
                 AreaMark(x: .value("Hour", h), y: .value("Delay", v)).foregroundStyle(Theme.warn.opacity(0.22))
                 LineMark(x: .value("Hour", h), y: .value("Delay", v)).foregroundStyle(Theme.warn)
@@ -283,17 +302,20 @@ struct FlightDetailView: View {
 
     private func weatherCard(_ s: LiveState) -> some View {
         section("Good to know") {
-            weatherRow(flight.dep, s.depWeather)
-            weatherRow(flight.arr, s.arrWeather)
+            weatherRow(flight.dep, s.depWeather, live: s.weatherLive)
+            weatherRow(flight.arr, s.arrWeather, live: s.weatherLive)
             if let a = flight.depAirport, let b = flight.arrAirport {
                 let diff = (b.timeZone.secondsFromGMT() - a.timeZone.secondsFromGMT()) / 3600
                 row("Time zone change", diff == 0 ? "None" : "\(diff > 0 ? "+" : "")\(diff) h", last: true)
             }
         }
     }
-    private func weatherRow(_ code: String, _ w: WeatherInfo) -> some View {
+    private func weatherRow(_ code: String, _ w: WeatherInfo, live: Bool) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack { Image(systemName: w.symbol).symbolRenderingMode(.multicolor).frame(width: 24); Text("\(code) · \(w.condition)").font(.f(16, .semibold)); Spacer()
+            HStack { Image(systemName: w.symbol).symbolRenderingMode(.multicolor).frame(width: 24); Text("\(code) · \(w.condition)").font(.f(16, .semibold))
+                Text(live ? "LIVE" : "SIMULATED").font(.system(size: 9, weight: .heavy)).tracking(0.5).foregroundStyle(live ? Theme.good : .secondary)
+                    .padding(.horizontal, 5).padding(.vertical, 2).background((live ? Theme.good : Color.secondary).opacity(0.14), in: Capsule())
+                Spacer()
                 Text("\(w.tempC)°C · \(w.windKts) kt").font(.f(15)).foregroundStyle(.secondary) }
             Text(w.metar).font(.system(size: 11, design: .monospaced)).foregroundStyle(.tertiary).padding(.leading, 32)
         }.padding(.vertical, 13).overlay(alignment: .bottom) { Rectangle().fill(Theme.hairline).frame(height: 0.5) }
@@ -320,7 +342,7 @@ struct FlightDetailView: View {
 
     private func aircraftCard(_ s: LiveState) -> some View {
         section("Aircraft") {
-            row("Type", flight.aircraft); row("Tail number", flight.tail)
+            row("Type", flight.aircraft.isEmpty ? "—" : flight.aircraft); row("Tail number", flight.tail.isEmpty ? "—" : flight.tail)
             row("Airline", flight.airlineName, last: s.phase != .enRoute)
             if s.phase == .enRoute { row("Heading", "\(Int(s.heading))°", last: true) }
         }
@@ -356,33 +378,58 @@ struct FlightDetailView: View {
     }
 }
 
+/// Route map: the whole great-circle route framed above the sheet, flat satellite view, thin curved arc
+/// (solid where flown, dotted ahead), labelled airport pins and the aircraft riding the arc.
 struct FlightMap: View {
     let flight: Flight
     let state: LiveState
+    private let blue = Color(red: 0.30, green: 0.62, blue: 1.0)
+
     var body: some View {
         if let a = flight.depAirport, let b = flight.arrAirport {
-            Map(initialPosition: .rect(boundingRect(Geo.path(a, b)))) {
-                MapPolyline(coordinates: [a.coordinate, b.coordinate], contourStyle: .geodesic).stroke(.white.opacity(0.55), style: StrokeStyle(lineWidth: 3, dash: [2, 6]))
-                if state.progress > 0, state.progress < 1 {
-                    let pts = Geo.path(a, b)
-                    MapPolyline(coordinates: Array(pts.prefix(Int(state.progress * 64) + 1))).stroke(Color(red: 0.25, green: 0.6, blue: 1.0), lineWidth: 4)
+            let path = Geo.path(a, b, steps: 96)
+            let flown = Int((state.progress * 96).rounded())
+            Map(initialPosition: .camera(camera(a, b))) {
+                // Remaining route: fine dots
+                MapPolyline(coordinates: Array(path.suffix(from: min(flown, path.count - 1))))
+                    .stroke(.white.opacity(0.75), style: StrokeStyle(lineWidth: 2.2, lineCap: .round, dash: [0.5, 6]))
+                // Flown route: solid
+                if flown > 0 {
+                    MapPolyline(coordinates: Array(path.prefix(flown + 1))).stroke(blue, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                 }
-                Annotation(a.iata, coordinate: a.coordinate) { pin }
-                Annotation(b.iata, coordinate: b.coordinate) { pin }
+                Annotation("", coordinate: a.coordinate, anchor: .center) { pin(a.iata) }
+                Annotation("", coordinate: b.coordinate, anchor: .center) { pin(b.iata) }
                 if state.phase == .enRoute, let p = state.position {
-                    Annotation("", coordinate: p) {
-                        Image(systemName: "airplane").font(.system(size: 28, weight: .semibold)).foregroundStyle(.white)
-                            .rotationEffect(.degrees(state.heading - 90)).shadow(color: .black.opacity(0.5), radius: 4)
-                    }
+                    Annotation("", coordinate: p, anchor: .center) { plane }
                 }
-            }.mapStyle(.imagery(elevation: .realistic)).mapControls { }
+            }
+            .mapStyle(.imagery(elevation: .flat))
+            .mapControls { }
         } else { Color.black }
     }
-    private var pin: some View { Circle().fill(Color(red: 0.2, green: 0.5, blue: 1.0)).frame(width: 12, height: 12).overlay(Circle().stroke(.white, lineWidth: 2.5)) }
-    private func boundingRect(_ pts: [CLLocationCoordinate2D]) -> MKMapRect {
-        var rect = MKMapRect.null
-        for p in pts { let mp = MKMapPoint(p); rect = rect.union(MKMapRect(x: mp.x, y: mp.y, width: 0.1, height: 0.1)) }
-        return rect.insetBy(dx: -rect.width * 0.3 - 300_000, dy: -rect.height * 0.5 - 300_000)
+
+    private var plane: some View {
+        // SF Symbol "airplane" points right; rotate so the nose follows the bearing.
+        Image(systemName: "airplane").font(.system(size: 24, weight: .bold)).foregroundStyle(.white)
+            .rotationEffect(.degrees(state.heading - 90))
+            .shadow(color: .black.opacity(0.55), radius: 3, y: 1)
+            .padding(6).background(blue.opacity(0.0001))
+    }
+
+    private func pin(_ code: String) -> some View {
+        VStack(spacing: 3) {
+            Circle().fill(.white).frame(width: 10, height: 10).overlay(Circle().stroke(blue, lineWidth: 3))
+            Text(code).font(.system(size: 12, weight: .bold)).foregroundStyle(.white).shadow(color: .black.opacity(0.7), radius: 2)
+        }
+    }
+
+    /// North-up, straight-down camera centred on the route midpoint, high enough to fit the whole route
+    /// in the area above the sheet.
+    private func camera(_ a: Airport, _ b: Airport) -> MapCamera {
+        let mid = Geo.interpolate(a, b, 0.5)
+        let metres = Geo.distanceMiles(a, b) * 1609.34
+        let distance = max(450_000, metres * 2.6)
+        return MapCamera(centerCoordinate: mid, distance: min(distance, 40_000_000), heading: 0, pitch: 0)
     }
 }
 
