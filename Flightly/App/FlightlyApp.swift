@@ -41,7 +41,7 @@ struct RootView: View {
                 NavigationStack { AddFlightView(embedded: true) { tab = 0 } }
             }
         }
-        .task(id: model.now) { model.refresh(flights, context: context); await model.refreshRealData(); await model.refreshRealFlights(flights, context: context) }
+        .task(id: model.now) { model.refresh(flights, context: context); await model.refreshRealData(); await model.refreshRealFlights(flights, context: context); await model.refreshPositions(flights) }
         #if DEBUG
         .task {
             let env = ProcessInfo.processInfo.environment

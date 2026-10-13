@@ -12,14 +12,16 @@ struct FlightDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Flight.schedDep) private var all: [Flight]
     @State private var detent: SheetDetent = .medium
+    @AppStorage("detail_map_satellite") private var satellite = false
     @State private var showEdit = false
     @State private var confirmDelete = false
     @AppStorage("my_name") private var myName = "Me"
 
     var body: some View {
         let s = model.live(flight)
-        MapSheet(detent: $detent, map: { FlightMap(flight: flight, state: s) }, controls: { EmptyView() },
-                 header: { header(s) }, content: { content(s) }, backdrop: Color(red: 0.07, green: 0.14, blue: 0.24))
+        MapSheet(detent: $detent, map: { FlightMap(flight: flight, state: s, satellite: satellite) },
+                 controls: { Button { withAnimation(.easeInOut(duration: 0.25)) { satellite.toggle() } } label: { GlassMapButton(symbol: satellite ? "map.fill" : "globe.americas.fill", onDarkMap: true) }.buttonStyle(.plain) },
+                 header: { header(s) }, content: { content(s) }, backdrop: satellite ? Color(red: 0.07, green: 0.14, blue: 0.24) : Color(red: 0.09, green: 0.10, blue: 0.13))
             .toolbar(.hidden, for: .navigationBar)
             .toolbar(.hidden, for: .tabBar)
             .sheet(isPresented: $showEdit) { EditFlightView(flight: flight) }
@@ -65,6 +67,12 @@ struct FlightDetailView: View {
                     HStack(spacing: 4) { if model.adbBusy { ProgressView().controlSize(.mini) } else { Image(systemName: "arrow.clockwise") }; Text("Refresh") }.font(.f(12, .semibold))
                 }.disabled(model.adbBusy)
             } else { Text("Simulated flight data").font(.f(12)).foregroundStyle(.secondary) }
+        }
+        if s.isReal, s.phase == .enRoute {
+            HStack(spacing: 6) {
+                Image(systemName: s.positionLive ? "location.fill" : "location").font(.system(size: 10)).foregroundStyle(s.positionLive ? Theme.good : .secondary)
+                Text(s.positionLive ? "Live position · \(s.positionTime.map { $0.formatted(date: .omitted, time: .shortened) } ?? "now")" : "Position estimated along the route").font(.f(12)).foregroundStyle(.secondary)
+            }
         }
         if s.isReal, let e = model.adbError { Text(e).font(.f(12)).foregroundStyle(Theme.warn) }
     }
@@ -380,22 +388,25 @@ struct FlightDetailView: View {
 
 /// Route map: the whole great-circle route framed above the sheet, flat satellite view, thin curved arc
 /// (solid where flown, dotted ahead), labelled airport pins and the aircraft riding the arc.
+/// Route map: the whole great-circle route framed above the sheet. Default is a muted dark "stylized" basemap so the route
+/// is the hero; satellite is one tap away. Thin curved arc (solid where flown, dotted ahead), labelled pins, aircraft on the arc.
 struct FlightMap: View {
     let flight: Flight
     let state: LiveState
-    private let blue = Color(red: 0.30, green: 0.62, blue: 1.0)
+    var satellite = false
+    private var accent: Color { satellite ? Color(red: 0.30, green: 0.62, blue: 1.0) : Color(red: 0.38, green: 0.66, blue: 1.0) }
 
     var body: some View {
         if let a = flight.depAirport, let b = flight.arrAirport {
             let path = Geo.path(a, b, steps: 96)
             let flown = Int((state.progress * 96).rounded())
             Map(initialPosition: .camera(camera(a, b))) {
-                // Remaining route: fine dots
                 MapPolyline(coordinates: Array(path.suffix(from: min(flown, path.count - 1))))
-                    .stroke(.white.opacity(0.75), style: StrokeStyle(lineWidth: 2.2, lineCap: .round, dash: [0.5, 6]))
-                // Flown route: solid
+                    .stroke(.white.opacity(satellite ? 0.75 : 0.55), style: StrokeStyle(lineWidth: 2.2, lineCap: .round, dash: [0.5, 6]))
                 if flown > 0 {
-                    MapPolyline(coordinates: Array(path.prefix(flown + 1))).stroke(blue, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    // soft glow under the flown segment
+                    MapPolyline(coordinates: Array(path.prefix(flown + 1))).stroke(accent.opacity(0.28), style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                    MapPolyline(coordinates: Array(path.prefix(flown + 1))).stroke(accent, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                 }
                 Annotation("", coordinate: a.coordinate, anchor: .center) { pin(a.iata) }
                 Annotation("", coordinate: b.coordinate, anchor: .center) { pin(b.iata) }
@@ -403,33 +414,31 @@ struct FlightMap: View {
                     Annotation("", coordinate: p, anchor: .center) { plane }
                 }
             }
-            .mapStyle(.imagery(elevation: .flat))
+            .mapStyle(satellite ? .imagery(elevation: .flat)
+                                : .standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll, showsTraffic: false))
+            .environment(\.colorScheme, .dark)
             .mapControls { }
         } else { Color.black }
     }
 
     private var plane: some View {
-        // SF Symbol "airplane" points right; rotate so the nose follows the bearing.
         Image(systemName: "airplane").font(.system(size: 24, weight: .bold)).foregroundStyle(.white)
             .rotationEffect(.degrees(state.heading - 90))
             .shadow(color: .black.opacity(0.55), radius: 3, y: 1)
-            .padding(6).background(blue.opacity(0.0001))
+            .padding(6)
     }
 
     private func pin(_ code: String) -> some View {
         VStack(spacing: 3) {
-            Circle().fill(.white).frame(width: 10, height: 10).overlay(Circle().stroke(blue, lineWidth: 3))
+            Circle().fill(.white).frame(width: 10, height: 10).overlay(Circle().stroke(accent, lineWidth: 3))
             Text(code).font(.system(size: 12, weight: .bold)).foregroundStyle(.white).shadow(color: .black.opacity(0.7), radius: 2)
         }
     }
 
-    /// North-up, straight-down camera centred on the route midpoint, high enough to fit the whole route
-    /// in the area above the sheet.
     private func camera(_ a: Airport, _ b: Airport) -> MapCamera {
         let mid = Geo.interpolate(a, b, 0.5)
         let metres = Geo.distanceMiles(a, b) * 1609.34
-        let distance = max(450_000, metres * 2.6)
-        return MapCamera(centerCoordinate: mid, distance: min(distance, 40_000_000), heading: 0, pitch: 0)
+        return MapCamera(centerCoordinate: mid, distance: min(max(450_000, metres * 2.6), 40_000_000), heading: 0, pitch: 0)
     }
 }
 

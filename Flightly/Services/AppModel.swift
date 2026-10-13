@@ -33,6 +33,9 @@ final class AppModel {
         hasKey = ADB.hasKey
     }
     func removeKey() { Keychain.delete("rapidapi-key"); hasKey = ADB.hasKey; keyMessage = "Key removed." }
+    var positions: [String: LivePosition] = [:]       // live aircraft positions keyed by Flight.uuid
+    var positionChecked: [String: Date] = [:]
+    var positionNote: String?
     var pendingSnapshots: [String: RealSnapshot] = [:]   // looked-up but not yet added
     @ObservationIgnored @AppStorage("adb_auto") var adbAuto = true
     /// Set by a flightly://flight?id=… link (Live Activity / widget tap); the Flights tab consumes it.
@@ -103,8 +106,8 @@ final class AppModel {
 
     func live(_ f: Flight) -> LiveState {
         var s: LiveState
-        if f.isReal, let snap = snapshots[f.uuid.uuidString] { s = RealState.make(f, snap, now: Date()) }
-        else if f.isReal { s = RealState.make(f, RealSnapshot(emptyFor: f), now: Date()) }
+        if f.isReal, let snap = snapshots[f.uuid.uuidString] { s = RealState.make(f, snap, now: Date(), live: positions[f.uuid.uuidString]) }
+        else if f.isReal { s = RealState.make(f, RealSnapshot(emptyFor: f), now: Date(), live: nil) }
         else { s = provider.state(for: f, at: clock) }
         if let w = liveWeather[f.dep] { s.depWeather = w }
         if let w = liveWeather[f.arr] { s.arrWeather = w }

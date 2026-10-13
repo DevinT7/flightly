@@ -27,6 +27,7 @@
 		BE647936144B030DEB290CA9 /* PassportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AE2FCB0BED834F3D2BEF /* PassportView.swift */; };
 		C80B8C1937CB58035EE24C66 /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE45078B509945636FF7751C /* Widgets.swift */; };
 		D7E494A237326EBEC41747B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20F370BE21C380210B11A7EA /* Assets.xcassets */; };
+		DA110BD62A85FD28520F34F7 /* OpenSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2E9019FEC15002572306BA /* OpenSky.swift */; };
 		DB2BFC8065FBB0E1404FD508 /* RealData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 208A6E6FFDBF455281E271AD /* RealData.swift */; };
 		DCEDB425A78F4C5AE06B4359 /* FlightlyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29F249485E46BB3ECB01E0A /* FlightlyApp.swift */; };
 		E6CE27335B826A6A5F667CDD /* RealState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341401C3E7A2E79FDF3D855A /* RealState.swift */; };
@@ -83,6 +84,7 @@
 		CC6738AF8761F40C32747B8B /* MapSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapSheet.swift; sourceTree = "<group>"; };
 		CE45078B509945636FF7751C /* Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
 		CEAF69DC46A40B0BC6AFB5EC /* FlightDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightDetailView.swift; sourceTree = "<group>"; };
+		DB2E9019FEC15002572306BA /* OpenSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSky.swift; sourceTree = "<group>"; };
 		E178139DB779110A65B39FC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EF85D22EDB89F25237484F9C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F29F249485E46BB3ECB01E0A /* FlightlyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightlyApp.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				0C82CCA653706326B6E35EB5 /* AeroDataBox.swift */,
 				A08B5D4F4BA590323D86D96E /* AppModel.swift */,
 				A2A0DC46C845C0287BD0F725 /* Importers.swift */,
+				DB2E9019FEC15002572306BA /* OpenSky.swift */,
 				208A6E6FFDBF455281E271AD /* RealData.swift */,
 			);
 			path = Services;
@@ -311,6 +314,7 @@
 				4772C6899B2EC495497ADC53 /* Importers.swift in Sources */,
 				2BD34F3512A030E741C94670 /* LiveEngine.swift in Sources */,
 				E74BC3DF438BF912E996A01B /* MapSheet.swift in Sources */,
+				DA110BD62A85FD28520F34F7 /* OpenSky.swift in Sources */,
 				BE647936144B030DEB290CA9 /* PassportView.swift in Sources */,
 				DB2BFC8065FBB0E1404FD508 /* RealData.swift in Sources */,
 				E6CE27335B826A6A5F667CDD /* RealState.swift in Sources */,

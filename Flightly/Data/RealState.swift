@@ -4,7 +4,7 @@ import CoreLocation
 /// Builds the app's LiveState for a real flight from the provider snapshot. Anything the provider doesn't supply
 /// is left empty (never invented): no inbound chain, forecast or trend, and unknown gate/taxi data shows as "—".
 enum RealState {
-    static func make(_ f: Flight, _ snap: RealSnapshot, now: Date) -> LiveState {
+    static func make(_ f: Flight, _ snap: RealSnapshot, now: Date, live: LivePosition? = nil) -> LiveState {
         let sched = (dep: snap.depSched ?? f.schedDep, arr: snap.arrSched ?? f.schedArr)
         let estDep = snap.depRevised ?? sched.dep
         let estArr = snap.arrRevised ?? sched.arr
@@ -36,7 +36,21 @@ enum RealState {
 
         var position: CLLocationCoordinate2D?
         var heading = snap.heading ?? 0
-        if let lat = snap.lat, let lon = snap.lon, phase == .enRoute { position = .init(latitude: lat, longitude: lon) }
+        var livePos = false
+        if let lp = live, phase == .enRoute || phase == .taxiingOut, let a = f.depAirport, let b = f.arrAirport {
+            // Progress from the real position: share of the remaining+flown great-circle distance already covered.
+            let here = CLLocation(latitude: lp.lat, longitude: lp.lon)
+            let flown = CLLocation(latitude: a.lat, longitude: a.lon).distance(from: here)
+            let left = CLLocation(latitude: b.lat, longitude: b.lon).distance(from: here)
+            let routeLen = CLLocation(latitude: a.lat, longitude: a.lon).distance(from: CLLocation(latitude: b.lat, longitude: b.lon))
+            // Trust the position only if it lies near the planned route (guards against a swapped aircraft or a stale/wrong ID).
+            if flown + left > 0, flown + left < routeLen * 1.5 + 150_000 {
+                progress = min(1, max(0, flown / (flown + left)))
+                position = lp.coordinate; heading = lp.heading ?? heading; livePos = true
+            }
+        }
+        if livePos {}
+        else if let lat = snap.lat, let lon = snap.lon, phase == .enRoute { position = .init(latitude: lat, longitude: lon) }
         else if let a = f.depAirport, let b = f.arrAirport {
             if phase == .enRoute { position = Geo.interpolate(a, b, progress)   // estimated along the great circle
                 heading = Geo.bearing(position!, Geo.interpolate(a, b, min(1, progress + 0.01))) }
@@ -58,7 +72,7 @@ enum RealState {
         var s = LiveState(
             phase: phase, depDelay: depDelay, arrDelay: phase == .canceled ? 0 : arrDelay, estDep: estDep, estArr: estArr,
             actDep: snap.depRunway, actArr: snap.arrRunway, progress: progress, position: position, heading: heading,
-            altitudeFt: snap.altFt ?? 0, speedKts: snap.speedKts ?? 0, delayReason: nil, prediction: prediction,
+            altitudeFt: live?.altFt ?? snap.altFt ?? 0, speedKts: live?.speedKts ?? snap.speedKts ?? 0, delayReason: nil, prediction: prediction,
             depGate: snap.depGate ?? "—", arrGate: snap.arrGate ?? "—", baggage: snap.baggage ?? "—",
             taxiOutMin: snap.depRunway.map { max(0, Int($0.timeIntervalSince(estDep) / 60)) } ?? 0,
             taxiInMin: (snap.arrRunway != nil) ? max(0, Int(estArr.timeIntervalSince(snap.arrRunway!) / 60)) : 0,
@@ -66,6 +80,8 @@ enum RealState {
             depWeather: nowSim.weather(f.dep, now), arrWeather: nowSim.weather(f.arr, now), trend: [], canceledRisk: 0,
             minutesToBoarding: Int(estDep.addingTimeInterval(-40 * 60).timeIntervalSince(now) / 60))
         s.isReal = true
+        s.positionLive = livePos
+        s.positionTime = live?.timestamp
         s.wheelsUp = snap.depRunway; s.wheelsDown = snap.arrRunway; s.updatedAt = snap.fetchedAt
         return s
     }

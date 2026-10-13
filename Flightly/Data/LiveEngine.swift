@@ -49,6 +49,8 @@ struct LiveState {
     var faaArr: FAAStatus? = nil
     // Provenance. For real flights the simulator-only sections (inbound chain, forecast, trend) are left empty.
     var isReal = false
+    var positionLive = false
+    var positionTime: Date? = nil
     var wheelsUp: Date? = nil
     var wheelsDown: Date? = nil
     var updatedAt: Date? = nil

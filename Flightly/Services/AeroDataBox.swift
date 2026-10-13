@@ -100,6 +100,7 @@ struct ADBFlight {
     var arr: ADBLeg
     var reg: String?
     var model: String?
+    var modeS: String?
     var location: ADBLocationData?
 }
 
@@ -138,7 +139,7 @@ enum ADBParse {
         let number = compact.hasPrefix(airlineIata) ? String(compact.dropFirst(airlineIata.count)) : compact
         let ac = d["aircraft"] as? [String: Any]
         return ADBFlight(airlineIata: airlineIata, airlineName: str(al?["name"]) ?? airlineIata, number: number, status: str(d["status"]) ?? "Unknown",
-                         dep: leg(d["departure"]), arr: leg(d["arrival"]), reg: str(ac?["reg"]), model: str(ac?["model"]), location: location(d["location"]))
+                         dep: leg(d["departure"]), arr: leg(d["arrival"]), reg: str(ac?["reg"]), model: str(ac?["model"]), modeS: str(ac?["modeS"])?.lowercased(), location: location(d["location"]))
     }
     static func flights(_ data: Data) -> [ADBFlight] {
         guard let json = try? JSONSerialization.jsonObject(with: data) else { return [] }
@@ -169,6 +170,7 @@ struct RealSnapshot: Codable, Equatable {
     var baggage: String?
     var reg: String?
     var model: String?
+    var modeS: String?
     var lat: Double?
     var lon: Double?
     var altFt: Int?
@@ -183,7 +185,7 @@ struct RealSnapshot: Codable, Equatable {
         arrSched = f.arr.scheduled; arrRevised = f.arr.revised; arrRunway = f.arr.runway
         depTerminal = f.dep.terminal; depGate = f.dep.gate; depCheckIn = f.dep.checkIn
         arrTerminal = f.arr.terminal; arrGate = f.arr.gate; baggage = f.arr.baggage
-        reg = f.reg; model = f.model
+        reg = f.reg; model = f.model; modeS = f.modeS
         lat = f.location?.lat; lon = f.location?.lon; altFt = f.location?.altFt; speedKts = f.location?.speedKts; heading = f.location?.heading
         self.fetchedAt = fetchedAt; self.nextFetch = nextFetch
     }
@@ -421,16 +423,38 @@ extension AppModel {
               let info = try? JSONSerialization.jsonObject(with: infoData) as? [String: Any],
               let here = ADBParse.airport(info) else { return }
         let existing = (try? context.fetch(FetchDescriptor<Flight>())) ?? []
-        guard !existing.contains(where: { $0.isReal }) else { return }
+        let liveTest = ProcessInfo.processInfo.environment["FLIGHTLY_FIXTURE_MODES"] != nil
+        if liveTest { guard !existing.contains(where: { $0.notes == "fixture-live" }) else { return } }
+        else { guard !existing.contains(where: { $0.isReal }) else { return } }
         var picks: [ADBFlight] = []
         let all = ADBParse.flights(data)
+        if liveTest, let one = all.first(where: { $0.status == "Departed" && $0.arr.airport != nil && $0.reg != nil }) {
+            var f = one; f.dep.airport = here
+            if let fl = ADBMap.makeFlight(f) {
+                fl.notes = "fixture-live"
+                var snap = RealSnapshot(f, fetchedAt: Date().addingTimeInterval(-60), nextFetch: Date().addingTimeInterval(6 * 3600))
+                snap.modeS = ProcessInfo.processInfo.environment["FLIGHTLY_FIXTURE_MODES"]; snap.status = "EnRoute"
+                snap.depRunway = Date().addingTimeInterval(-3600); snap.arrRunway = nil
+                snap.depSched = Date().addingTimeInterval(-3900); snap.depRevised = snap.depSched
+                snap.arrSched = Date().addingTimeInterval(7200); snap.arrRevised = snap.arrSched
+                fl.schedDep = snap.depSched!; fl.schedArr = snap.arrSched!
+                snapshots[fl.uuid.uuidString] = snap
+                context.insert(fl); try? context.save(); persistADB()
+            }
+            return
+        }
         for status in ["Departed", "Expected", "Canceled"] {
             if let f = all.first(where: { $0.status == status && $0.arr.airport != nil && $0.dep.gate != nil && $0.reg != nil }) { picks.append(f) }
         }
         for var f in picks {
             f.dep.airport = here
             guard let fl = ADBMap.makeFlight(f) else { continue }
-            let snap = RealSnapshot(f, fetchedAt: Date().addingTimeInterval(-300), nextFetch: Date().addingTimeInterval(6 * 3600))
+            var snap = RealSnapshot(f, fetchedAt: Date().addingTimeInterval(-300), nextFetch: Date().addingTimeInterval(6 * 3600))
+            if ["Expected", "Departed"].contains(f.status), let hex = ProcessInfo.processInfo.environment["FLIGHTLY_FIXTURE_MODES"] {
+                // Pretend this flight is airborne, flown by the aircraft with this Mode-S address (tests the OpenSky path).
+                snap.modeS = hex; snap.status = "EnRoute"; snap.depRunway = Date().addingTimeInterval(-3600); snap.arrRunway = nil
+                snap.depSched = Date().addingTimeInterval(-3900); snap.depRevised = snap.depSched; snap.arrSched = Date().addingTimeInterval(7200); snap.arrRevised = snap.arrSched
+            }
             snapshots[fl.uuid.uuidString] = snap
             context.insert(fl)
         }
